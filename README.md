@@ -1,21 +1,61 @@
-## Used Database for storing raw sensor data
+Certainly! Here's a sample `README.md` for your project:
 
-In this approach I the server fetches sensor data from a PostgreSQL database, performs data processing, and provides access to the processed data via an API.
+---
 
-## Features
+# Sensor Data Visualization Project
 
-- Fetches the last 10 entries of sensor data from a PostgreSQL database.
-- Calculates the average temperature and average humidity of the fetched data.
-- Provides access to the processed data through a RESTful API.
+This project visualizes sensor data fetched from a database and displays it on a web dashboard. It uses Flask for the web backend and frontend, and PostgreSQL for the database. The data includes temperature and humidity readings, which are processed to calculate averages, and max/min values. This data is then plotted and displayed on the dashboard.
 
-## Requirements
+## Prerequisites
 
-- Python 3.x
-- PostgreSQL database(Preferably docker container)
-- pgadmin provides GUI for postgreSQL.
-- Required Python packages (specified in `requirements.txt`)
+## Directory Structure
 
-## Execution
+Here's a brief overview of the project directory structure:
 
-- run docker-compose up --build. It will build the images using docker files and run the containers.
-- Created custom docker network to create connectivity
+- **server**: Contains the server scripts including the one to initialize the database (`table.py`).
+- **backend**: Contains the backend server logic for data processing and API endpoints.
+- **client**: Houses the frontend Flask application that displays the dashboard to users.
+- **plots**: A folder to store generated plots.
+- **templates**: Contains HTML templates used by the client Flask app.
+- **docker-compose.yml**: The docker-compose configuration file.
+
+## How to Run the Project
+
+1. **Clone the Repository**:
+
+   ```bash
+   git clone https://github.com/munishreddy1/python_docker.git
+   cd PROJECT_DIRECTORY
+   ```
+
+2. **Build and Start the Containers**:
+
+   Due to dependencies between the services, it's essential to start them in the correct order. Follow these commands:
+
+   ```bash
+   docker-compose up -d db
+   ```
+
+   Wait for a few seconds to ensure the database is fully initialized.
+
+   ```bash
+   docker-compose up -d init_db
+   ```
+
+   This step initializes the table structure. The script waits for 10 seconds before executing to make sure the database is ready to accept connections.
+
+   ```bash
+   docker-compose up -d server
+   docker-compose up -d backend
+   docker-compose up -d client
+   ```
+
+3. **Access the Dashboard**:
+
+   After starting all services, you can access the dashboard by navigating to:
+
+   ```
+   http://localhost:5001/
+   ```
+
+   Here, you'll see processed sensor data and a plot.

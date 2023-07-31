@@ -3,10 +3,10 @@ import requests
 import os
 
 # Update new folders created at root level
-app = Flask(__name__, template_folder='../templates', static_folder='../plots')
+app = Flask(__name__, template_folder='/app/templates', static_folder='/app/plots')
 
 # Define the backend server URL
-backend_url = 'http://localhost:5000/api/processed-data'
+backend_url = 'http://backend:5000/api/processed-data'
 
 
 @app.route('/')
@@ -27,4 +27,5 @@ def dashboard():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
+

@@ -1,5 +1,31 @@
 version: "3"
 services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    networks:
+      - kiutra
+
+  init_db:
+    build:
+      context: ./server
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+    command: sh -c "sleep 10 && python table.py" # Add a delay of 10 seconds before running table.py
+    networks:
+      - kiutra
+
   server:
     build:
       context: ./server
@@ -9,47 +35,46 @@ services:
       - DB_DATABASE=postgres
       - DB_USER=postgres
       - DB_PASSWORD=password
+    # depends_on:
+    #   - init_db
+    # command: sh -c "sleep 15 && python server.py" # Add a delay of 15 seconds before running backend_server.py
     networks:
-      - my_network
+      - kiutra
 
   backend:
     build:
-      context: ./backend_server
+      context: .
+      dockerfile: ./backend_server/Dockerfile
+    volumes:
+      - plots-data:/app/plots
+    ports:
+      - "5000:5000"
     environment:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_DATABASE=postgres
       - DB_USER=postgres
       - DB_PASSWORD=password
+    # depends_on:
+    #   - init_db
+    #command: sh -c "sleep 20 && python backend_server.py" # Add a delay of 20 seconds before running backend_server.py
     networks:
-      - my_network
+      - kiutra
 
   client:
     build:
       context: .
       dockerfile: ./client/Dockerfile
+    volumes:
+      - plots-data:/app/plots
     ports:
       - "5001:5001"
-    depends_on:
-      - backend
     environment:
       - BACKEND_URL=http://backend:5000/api/processed-data
     networks:
-      - my_network
-
-  db:
-    image: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - my_network
-
+      - kiutra
+volumes:
+  plots-data:
 networks:
-  my_network:
+  kiutra:
     external: true

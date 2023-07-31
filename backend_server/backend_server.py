@@ -3,14 +3,14 @@ from flask import Flask, jsonify, send_file
 import psycopg2
 import os
 import matplotlib
+
 matplotlib.use('Agg')
 
 app = Flask(__name__)
 
 # Connect to the PostgreSQL database
-# Created global system environment variables for security and reusability
 connection = psycopg2.connect(
-    host='172.17.0.2',
+    host='db',
     port='5432',
     database='postgres',
     user='postgres',
@@ -19,7 +19,6 @@ connection = psycopg2.connect(
 
 # Create a cursor object
 cursor = connection.cursor()
-
 
 def fetch_sensor_data():
     # Fetch the last 10 entries from the database
@@ -43,16 +42,14 @@ def fetch_sensor_data():
     highest_humidity = max(rows, key=lambda x: x[1])[1]
     lowest_humidity = min(rows, key=lambda x: x[1])[1]
 
-    # Generate a path for the plots folder
-    plots_folder = os.path.join(os.path.dirname(
-        os.path.dirname(__file__)), 'plots')
+    # Updated plot path to store at the root level plots folder in the container
+    plot_path = '/app/plots/plot.png'
 
-    # Delete previous plot if it exists
-    plot_path = os.path.join(plots_folder, 'plot.png')
+    # If a previous plot exists, remove it before generating a new one
     if os.path.exists(plot_path):
         os.remove(plot_path)
 
-    # Generate a plot
+    # Generate the plot
     temperatures = [row[0] for row in rows]
     humidities = [row[1] for row in rows]
     plt.plot(temperatures, label='Temperature')
@@ -62,11 +59,11 @@ def fetch_sensor_data():
     plt.title('Sensor Data')
     plt.legend()
 
-    # Save the plot as an image file
+    # Save the plot to the specified path
     plt.savefig(plot_path)
     plt.close()
 
-    # Prepare the response
+    # Prepare the response data
     processed_data = {
         'average_temperature': average_temperature,
         'average_humidity': average_humidity,
@@ -78,28 +75,17 @@ def fetch_sensor_data():
 
     return processed_data
 
-
-# Define the route for accessing the processed sensor data
 @app.route('/api/processed-data')
 def get_processed_data():
     data = fetch_sensor_data()
     return jsonify(data)
 
-# Define the static route for serving the plot image
-
-
 @app.route('/plot')
 def get_plot():
-    plot_path = os.path.join('plots', 'plot.png')
+    plot_path = '/app/plots/plot.png'  # Direct path to the plot in the container
     return send_file(plot_path, mimetype='image/png')
 
-
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
 
 
-# hostname = 'host.docker.internal'
-# port = 5432
-# database = 'postgres'
-# username = 'postgres'
-# password = 'password'
