@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from flask import Flask, jsonify, send_file
 import psycopg2
 import os
+import numpy as np
 import matplotlib
 
 matplotlib.use('Agg')
