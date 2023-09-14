@@ -26,21 +26,17 @@ def fetch_sensor_data():
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    # Calculate average and mean
-    total_temperature = 0
-    total_humidity = 0
-    for row in rows:
-        temperature, humidity = row
-        total_temperature += temperature
-        total_humidity += humidity
-    average_temperature = total_temperature / len(rows)
-    average_humidity = total_humidity / len(rows)
+    # Calculate average and mean using NumPy
+    temperatures = np.array([row[0] for row in rows])
+    humidities = np.array([row[1] for row in rows])
+    average_temperature = np.mean(temperatures)
+    average_humidity = np.mean(humidities)
 
-    # Find highest and lowest values
-    highest_temperature = max(rows, key=lambda x: x[0])[0]
-    lowest_temperature = min(rows, key=lambda x: x[0])[0]
-    highest_humidity = max(rows, key=lambda x: x[1])[1]
-    lowest_humidity = min(rows, key=lambda x: x[1])[1]
+    # Find highest and lowest values using NumPy
+    highest_temperature = np.max(temperatures)
+    lowest_temperature = np.min(temperatures)
+    highest_humidity = np.max(humidities)
+    lowest_humidity = np.min(humidities)
 
     # Updated plot path to store at the root level plots folder in the container
     plot_path = '/app/plots/plot.png'
